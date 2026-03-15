@@ -48,7 +48,7 @@ function set_settings_enabled(enable) {
             (enable ? setting.enabled : setting.disabled);
     }
 
-    console.log(command);
+    // console.log(command);
     callDBus("nl.dvdgiessen.dbusapplauncher", "/nl/dvdgiessen/DBusAppLauncher",
         "nl.dvdgiessen.dbusapplauncher.Exec", "Cmd", command);
 }
