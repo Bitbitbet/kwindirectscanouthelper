@@ -13,8 +13,6 @@ const WhiteList = [
     }
 ]
 
-const output_name = "eDP-1";
-
 const settings = [
     {
         output: "eDP-1",
@@ -77,6 +75,5 @@ workspace.windowActivated.connect(window => {
             window[whiteListKey] = false;
         }
     }
-    /* Disable icc profile when the window is in white list and in fullscreen */
     set_settings_enabled(window[whiteListKey] && window.fullScreen);
 });
