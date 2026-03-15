@@ -1,7 +1,7 @@
 {
     "KPlugin": {
-        "Name": "Color Profile Source Manager",
-        "Description": "Disables icc profile when certain apps is active for certain windows to allow direct scanout",
+        "Name": "Direct Scanout Helper",
+        "Description": "Disables icc profile and scaling when certain windows are fullscreen to allow direct scanout",
         "Icon": "preferences-system-windows",
         "Authors": [
             {
@@ -9,10 +9,10 @@
                 "Name": "Bitbitbet"
             }
         ],
-        "Id": "colorprofilesourcemanager",
+        "Id": "directscanouthelper",
         "Version": "1.0",
         "License": "GPLv3",
-        "Website": "http://github.com/Bitbitbet/colorprofilesourcemanager"
+        "Website": "https://github.com/Bitbitbet/kwindirectscanouthelper"
     },
     "X-Plasma-API": "javascript",
     "X-Plasma-MainScript": "code/main.js",

@@ -6,21 +6,55 @@ const WhiteList = [
     {
         caption: null,
         resourceClass: /^steam_app_/
+    },
+    {
+        caption: null,
+        resourceClass: /^looking-glass-client$/
     }
 ]
 
 const output_name = "eDP-1";
 
-ICCDisabled = false;
+const settings = [
+    {
+        output: "eDP-1",
+        setting: "colorProfileSource",
+        disabled: "ICC",
+        enabled: "sRGB"
+    },
+    {
+        output: "eDP-1",
+        setting: "scale",
+        disabled: "1.5",
+        enabled: "1"
+    },
+];
+
 const whiteListKey = Symbol('Window is in whitelist');
 
-function toggleICC(disable) {
-    if (disable == ICCDisabled) return;
-    ICCDisabled = disable;
-    const profile = disable ? "sRGB" : "ICC";
-    callDBus("nl.dvdgiessen.dbusapplauncher", "/nl/dvdgiessen/DBusAppLauncher", "nl.dvdgiessen.dbusapplauncher.Exec", "Cmd",
-        "kscreen-doctor output." + output_name + ".colorProfileSource." + profile);
+function set_settings_enabled(enable) {
+    if (enable == set_settings_enabled.enabled) return;
+
+    set_settings_enabled.enabled = enable;
+    let command = "";
+    let first = true;
+    for (const setting of settings) {
+        if (first) {
+            first = false;
+        } else {
+            command += " && ";
+        }
+        command += "kscreen-doctor output." +
+            setting.output + "." +
+            setting.setting + "." +
+            (enable ? setting.enabled : setting.disabled);
+    }
+
+    console.log(command);
+    callDBus("nl.dvdgiessen.dbusapplauncher", "/nl/dvdgiessen/DBusAppLauncher",
+        "nl.dvdgiessen.dbusapplauncher.Exec", "Cmd", command);
 }
+set_settings_enabled.enabled = false;
 
 function isWindowInWhiteList(window) {
     return WhiteList.some(({ caption, resourceClass }) =>
@@ -32,20 +66,17 @@ workspace.windowActivated.connect(window => {
     if (!window) return;
     if (window[whiteListKey] === undefined) {
         if (isWindowInWhiteList(window)) {
-            // console.log("Look at the shiny new window I've found:\n" + window.caption + ", " + window.resourceClass);
             window[whiteListKey] = true;
 
-            /* Use to trigger profile change when the active window isn't changed but the fullscreen is toggled */
             window.fullScreenChanged.connect(() => {
                 if (window.active) {
-                    toggleICC(window.fullScreen);
+                    set_settings_enabled(window.fullScreen);
                 }
             });
         } else {
-            // console.log("Ehh, what a boring window I've found:\n" + window.caption + ", " + window.resourceClass);
             window[whiteListKey] = false;
         }
     }
     /* Disable icc profile when the window is in white list and in fullscreen */
-    toggleICC(window[whiteListKey] && window.fullScreen);
+    set_settings_enabled(window[whiteListKey] && window.fullScreen);
 });
