@@ -1,79 +1,88 @@
 const WhiteList = [
     {
         caption: null,
-        resourceClass: /^Minecraft/
-    },
-    {
-        caption: null,
-        resourceClass: /^steam_app_/
-    },
-    {
-        caption: null,
-        resourceClass: /^looking-glass-client$/
+        resourceClass: /^looking-glass-client$/,
+        disabledSettings: ["scaling"]
     }
 ]
 
-const settings = [
-    {
+const settings = {
+    "color_profile": {
         output: "eDP-1",
         setting: "colorProfileSource",
-        disabled: "ICC",
-        enabled: "sRGB"
+        whenDisabled: "ICC",
+        whenEnabled: "sRGB",
+        enabled: false
     },
-    {
+    "scaling": {
         output: "eDP-1",
         setting: "scale",
-        disabled: "1.5",
-        enabled: "1"
+        whenDisabled: "1.5",
+        whenEnabled: "1",
+        enabled: false
     },
-];
+};
 
-const whiteListKey = Symbol('Window is in whitelist');
+const whiteListKey = Symbol('On Window Object; whitelist entry');
 
-function set_settings_enabled(enable) {
-    if (enable == set_settings_enabled.enabled) return;
-
-    set_settings_enabled.enabled = enable;
+function set_settings_enabled(enable, disabledSettings) {
     let command = "";
     let first = true;
-    for (const setting of settings) {
+    for (const setting in settings) {
+        const doEnable = enable && !disabledSettings.includes(setting);
+        if (doEnable == settings[setting].enabled)
+            continue;
+        settings[setting].enabled = doEnable;
+
         if (first) {
             first = false;
         } else {
             command += " && ";
         }
+
         command += "kscreen-doctor output." +
-            setting.output + "." +
-            setting.setting + "." +
-            (enable ? setting.enabled : setting.disabled);
+            settings[setting].output + "." +
+            settings[setting].setting + "." +
+            (doEnable ? settings[setting].whenEnabled : settings[setting].whenDisabled);
     }
 
-    // console.log(command);
-    callDBus("nl.dvdgiessen.dbusapplauncher", "/nl/dvdgiessen/DBusAppLauncher",
-        "nl.dvdgiessen.dbusapplauncher.Exec", "Cmd", command);
+    if (command) {
+        // console.log("[DSH] Running: " + command)
+        callDBus("nl.dvdgiessen.dbusapplauncher", "/nl/dvdgiessen/DBusAppLauncher",
+            "nl.dvdgiessen.dbusapplauncher.Exec", "Cmd", command);
+    }
 }
-set_settings_enabled.enabled = false;
 
-function isWindowInWhiteList(window) {
-    return WhiteList.some(({ caption, resourceClass }) =>
+function findWhiteListEntry(window) {
+    return WhiteList.find(({ caption, resourceClass }) =>
         (caption === null || regex.test(window.caption)) &&
-        (resourceClass === null || resourceClass.test(window.resourceClass)))
+        (resourceClass === null || resourceClass.test(window.resourceClass)));
 }
 
 workspace.windowActivated.connect(window => {
     if (!window) return;
+
     if (window[whiteListKey] === undefined) {
-        if (isWindowInWhiteList(window)) {
-            window[whiteListKey] = true;
+        let whiteListEntry = findWhiteListEntry(window);
+
+        if (whiteListEntry) {
+            window[whiteListKey] = whiteListEntry;
 
             window.fullScreenChanged.connect(() => {
                 if (window.active) {
-                    set_settings_enabled(window.fullScreen);
+                    set_settings_enabled(window.fullScreen, window[whiteListKey].disabledSettings);
                 }
             });
         } else {
-            window[whiteListKey] = false;
+            window[whiteListKey] = null;
         }
     }
-    set_settings_enabled(window[whiteListKey] && window.fullScreen);
+
+    /* Now window[whiteListKey] will either be null or a white list entry */
+
+    if (window[whiteListKey] === null) {
+        set_settings_enabled(false, []);
+    } else {
+        set_settings_enabled(window.fullScreen, window[whiteListKey].disabledSettings);
+    }
 });
