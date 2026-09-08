@@ -3,7 +3,19 @@ const WhiteList = [
         caption: null,
         resourceClass: /^looking-glass-client$/,
         disabledSettings: ["scaling"]
-    }
+    },
+
+    /* For Minecraft */
+    {
+        caption: null,
+        resourceClass: /^java$/,
+        disabledSettings: ["scaling"]
+    },
+    {
+        caption: null,
+        resourceClass: /^com.mojang.minecraft.java-edition$/,
+        disabledSettings: ["scaling"]
+    },
 ]
 
 const settings = {
@@ -55,7 +67,7 @@ function set_settings_enabled(enable, disabledSettings) {
 
 function findWhiteListEntry(window) {
     return WhiteList.find(({ caption, resourceClass }) =>
-        (caption === null || regex.test(window.caption)) &&
+        (caption === null || caption.test(window.caption)) &&
         (resourceClass === null || resourceClass.test(window.resourceClass)));
 }
 
