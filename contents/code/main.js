@@ -13,7 +13,24 @@ const WhiteList = [
     },
     {
         caption: null,
-        resourceClass: /^com.mojang.minecraft.java-edition$/,
+        resourceClass: /^com.mojang.minecraft/, // Intentional: No dollar sign at the end
+        disabledSettings: ["scaling"]
+    },
+    {
+        caption: null,
+        resourceClass: /^minecraft.windows.exe$/,
+        disabledSettings: ["scaling"]
+    },
+
+    /* For Steam Apps */
+    {
+        caption: null,
+        resourceClass: /^steam_app_default$/,
+        disabledSettings: ["scaling"]
+    },
+    {
+        caption: null,
+        resourceClass : /^steam_app_\d+$/,
         disabledSettings: ["scaling"]
     },
 ]

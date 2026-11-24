@@ -1,8 +1,8 @@
 # Direct Scanout Helper
 ## Description
-A KWin script that disables color profile and scaling when certain apps are fullscreen to allow direct scanout on kde plasma.
+A KWin script that disables color profile and scaling when specified windows are fullscreen to allow direct scanout on kwin wayland.
 
 ## Dependencies
-This script assumes the dbus service `nl.dvdgiessen.dbusapplauncher` exists. It is used to run shell command.
+This script assumes dbus service `nl.dvdgiessen.dbusapplauncher` for running shell command.
 
-This script uses `kscreen-doctor` when changing color profile source and scaling.
+This script relies on `kscreen-doctor` for changing color profile source and scaling.
